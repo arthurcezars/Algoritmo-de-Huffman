@@ -3,6 +3,7 @@ public class NoHuffman {
     private int frequencia;
     private NoHuffman esquerdo;
     private NoHuffman direito;
+    private boolean folha;
     
     public NoHuffman(char simbolo, int frequencia){
         this.simbolo = simbolo;
@@ -49,6 +50,14 @@ public class NoHuffman {
 
     public int Compara(NoHuffman no){
         return this.frequencia - no.frequencia;
+    }
+
+    public void SetFolha(boolean folha){
+        this.folha = folha;
+    }
+
+    public boolean isFolha(){
+        return folha;
     }
 
     public String toString(){
