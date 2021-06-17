@@ -1,30 +1,30 @@
 public class NoHuffman {
-    private char simbolo;
-    private int frequencia;
+    private int simbolo;
+    private Integer frequencia;
     private NoHuffman esquerdo;
     private NoHuffman direito;
-    private boolean folha;
-    
-    public NoHuffman(char simbolo, int frequencia){
+    private Boolean folha;
+
+    public NoHuffman(int simbolo, Integer frequencia){
         this.simbolo = simbolo;
         this.frequencia = frequencia;
         this.esquerdo = null;
         this.direito = null;
     }
 
-    public void SetSimbolo(char simbolo){
+    public void SetSimbolo(int simbolo){
         this.simbolo = simbolo;
     }
 
-    public char GetSimbolo(){
+    public int GetSimbolo(){
         return this.simbolo;
     }
 
-    public void SetFrequencia(int frequencia){
+    public void SetFrequencia(Integer frequencia){
         this.frequencia = frequencia;
     }
 
-    public int GetFrequencia(){
+    public Integer GetFrequencia(){
         return this.frequencia;
     }
 
@@ -44,19 +44,11 @@ public class NoHuffman {
         return this.direito;
     }
 
-    public boolean Folha(){
-        return this.esquerdo == null &&  this.direito == null;
-    }
-
-    public int Compara(NoHuffman no){
-        return this.frequencia - no.frequencia;
-    }
-
-    public void SetFolha(boolean folha){
+    public void SetFolha(Boolean folha){
         this.folha = folha;
     }
 
-    public boolean isFolha(){
+    public Boolean isFolha(){
         return folha;
     }
 

@@ -1,235 +1,315 @@
-
 public class Huffman {
     private NoHuffman raiz;
-    private ListaChar inicioLista;
+    private ListaChar inicioListaChar = new ListaChar();
     private int tamanhoLista = 0;
 
-    public String Compactar(String texto){
-        String textoCompactado = "";
-        ListaChar mapaFrequenciaChar = this.GetCharFrequencia(texto); // Cria a tabela de frequencia
+    public String Compactar(String texto, NoHuffman raiz, ListaMapaBinario mapaBinario){
+       String textoCompactado = "";
 
-        ListaMapaBinario mapaBinario = this.criarMapaBinario(mapaFrequenciaChar); // Criação da tabela binária, relaciona o caractere a sequencia binaria
+       this.Compactar(raiz, "", mapaBinario);
 
-        this.raiz = this.CriarArvore(mapaFrequenciaChar); // Cria a árvore de Huffman
-        this.Compactar(raiz, "", mapaBinario);
+        for (int i = 0; i < texto.length(); i++){
+          char simbolo = texto.toCharArray()[i];
+          
+          if (simbolo == '\r'){
+            continue;
+          }
+          else if (simbolo == '\n'){
+            textoCompactado += System.lineSeparator();
+            continue;
+          }
 
-        for(int i = 0; i < texto.length(); i++){
-            char letra = texto.toCharArray()[i];
-            String valor = this.GetValorBinario(letra, mapaBinario);
-            textoCompactado += valor;
-            if(i != texto.length() - 1){
-                textoCompactado += " ";
-            }
+          String valor = this.GetValorBinario(simbolo, mapaBinario);
+          
+          textoCompactado += valor;
         }
 
-        return textoCompactado;
+       return textoCompactado;
     }
 
     private void Compactar(NoHuffman raiz, String sequenciaBinaria, ListaMapaBinario mapaBinario){
-        if(raiz.isFolha()){
-            this.BuscaInseriBinario(raiz.GetSimbolo(), sequenciaBinaria, mapaBinario);
-        }else{
-            // Cada vez que desço a esquerda adiciono 0 na sequencia binária
-            Compactar(raiz.GetNoEsquerdo(), sequenciaBinaria.concat("0"), mapaBinario);
-            // Cada vez que desço a direita adiciono 1 na sequencia binária
-            Compactar(raiz.GetNoDireito(), sequenciaBinaria.concat("1"), mapaBinario);
+       if (raiz.isFolha() != null){
+          this.BuscarInserirBinario((char)raiz.GetSimbolo(), sequenciaBinaria, mapaBinario);
+        }
+       else{
+          // Cada vez que desço a esquerda adiciono 0 na sequencia binária 
+          Compactar(raiz.GetNoEsquerdo(), sequenciaBinaria += "0", mapaBinario);
+          // Cada vez que desço a direita adiciono 1 na sequencia binária
+          Compactar(raiz.GetNoDireito(), sequenciaBinaria += "1", mapaBinario);
         }
     }
 
-    private NoHuffman CriarArvore(ListaChar mapaFrequenciaChar){
-        ListaChar listaPriorizada = this.OrdenaListaChar(mapaFrequenciaChar);
-        ListaChar incioListaChar = listaPriorizada;
+    private String GetValorBinario(char simbolo, ListaMapaBinario mapaBinario){
+       while (mapaBinario != null && mapaBinario.GetChave() != simbolo){
+          mapaBinario = mapaBinario.GetProximoBinario();
+       }
 
-        // Marca todos os nós como folhas
-        while(listaPriorizada.GetSimbolo() != null ){
-            listaPriorizada.GetSimbolo().SetFolha(true);
-            if(listaPriorizada.GetProximoChar() == null){
-                break;
-            }
-            listaPriorizada = listaPriorizada.GetProximoChar();
-        }
-
-        while(tamanhoLista > 1){
-            // Pega o primeiro e o segundo nó da lista
-            NoHuffman primeiroNo = incioListaChar.GetSimbolo();
-            NoHuffman segundoNo = incioListaChar.GetProximoChar().GetSimbolo();
-
-            // Crianção do novo nó raiz
-            NoHuffman novoNoRaiz = new NoHuffman('6', primeiroNo.GetFrequencia() + segundoNo.GetFrequencia());
-            novoNoRaiz.SetNoEsquerdo(primeiroNo);
-            novoNoRaiz.SetNoDireito(segundoNo);
-
-            listaPriorizada = this.BuscaFinalLista(inicioLista); // Encontra o final da lista
-            this.InserirLista(novoNoRaiz, listaPriorizada); // Inseri na ultima depois da ultima posisao da lista
-            // Remove as duas primeiras posições da lista 
-            incioListaChar = this.RemoverLista(incioListaChar);
-            incioListaChar = this.RemoverLista(incioListaChar);
-
-            // Reordena a lista de nós novamente
-            incioListaChar = this.OrdenaListaChar(incioListaChar);
-            listaPriorizada = incioListaChar;
-        }
-
-        return listaPriorizada.GetSimbolo();
+       return mapaBinario.GetValor();
     }
 
-    // Ordena a lista de frenquencia do char que mais aparece pro menor
-    private ListaChar OrdenaListaChar(ListaChar mapaFrequenciaChar){
-        ListaChar inicioListaChar = mapaFrequenciaChar;
-        ListaChar charAnterior = inicioListaChar;
-        ListaChar atual = inicioListaChar;
-        ListaChar proxiChar = inicioListaChar.GetProximoChar();
-        for(ListaChar i = inicioListaChar; i.GetProximoChar() != null; i = i.GetProximoChar()){
-            if(atual.GetSimbolo().GetFrequencia() < proxiChar.GetSimbolo().GetFrequencia()){
-                if(atual == inicioListaChar){
-                    atual.SetProximoChar(proxiChar.GetProximoChar());
-                    proxiChar.SetProximoChar(atual);
-                    inicioListaChar = proxiChar;
-                    charAnterior = inicioListaChar;
-                    atual = charAnterior;
-                    proxiChar = atual.GetProximoChar();
-                    i = inicioListaChar;
-                }else{
-                    atual.SetProximoChar(proxiChar.GetProximoChar());
-                    proxiChar.SetProximoChar(atual);
-                    charAnterior.SetProximoChar(proxiChar);
-                    charAnterior = inicioListaChar;
-                    atual = charAnterior;
-                    proxiChar = atual.GetProximoChar();
-                    i = inicioListaChar;
+    private void BuscarInserirBinario(char chave, String valor, ListaMapaBinario lista){
+       while (lista.GetChave() != chave){
+          lista = lista.GetProximoBinario();
+        }
+
+       lista.SetValor(valor);
+    }
+
+
+    /// <summary>
+    /// Cria uma lista com a frequencia que um simbolo aparece no texto
+    /// </summary>
+    /// <param name="texto">String</param>
+    /// <returns>ListaFrequenciaChar</returns>
+    public ListaChar GetFrequenciaChar(String texto){
+        ListaChar lista = this.inicioListaChar;
+        
+        for (char simbolo : texto.toCharArray()) {
+            if(lista.GetSimbolo() == null){
+                NoHuffman novoNoHuffman = new NoHuffman(simbolo, 1);
+                lista.SetSimbolo(novoNoHuffman);
+                tamanhoLista += 1;
+            }else if(lista != null){
+                lista = this.BuscarNaListaChar(simbolo, inicioListaChar);
+
+                if(lista.GetSimbolo().GetSimbolo() == (int)simbolo){
+                    lista.GetSimbolo().SetFrequencia(lista.GetSimbolo().GetFrequencia() + 1);
+                }else if(lista.GetProximoChar() == null){
+                    NoHuffman novoNoHuffman = new NoHuffman(simbolo, 1);
+                    this.InserirNaListaChar(novoNoHuffman, lista);
+                    tamanhoLista += 1;
                 }
-            }else{
-                charAnterior = atual;
-                atual = proxiChar;
-                proxiChar = proxiChar.GetProximoChar();
             }
         }
-        return inicioListaChar;
+        lista = inicioListaChar;
+
+        return lista;
     }
 
-    // Cria uma lista de binarios baseada nas letras do texto
-    private ListaMapaBinario criarMapaBinario(ListaChar mapaFrequenciaChar){
+    /// <summary>
+    /// Busca na lista pelo nó que possui o simbolo, caso não encontre retorna a ultima posição da lista
+    /// </summary>
+    /// <param name="letra">char</param>
+    /// <param name="lista">ListaChar</param>
+    /// <returns>ListaChar</returns>
+    private ListaChar BuscarNaListaChar(char letra, ListaChar lista){
+        ListaChar finaLista, atual;
+        finaLista = lista;
+        atual = lista;
+
+        while(atual != null){
+            if(atual.GetSimbolo().GetSimbolo() == (int)letra){
+                return atual;
+            }
+
+            finaLista = atual;
+            atual = atual.GetProximoChar();
+        }
+
+        return finaLista;
+    }
+
+    /// <summary>
+    /// Recebe o ultimo nó da lista e insere no apontador a referencia para um novo nó que é criado no metodo recebendo como simbolo 
+    /// um NoHuffman
+    /// </summary>
+    /// <param name="novoNoHuffman">NoHuffman</param>
+    /// <param name="lista">ListaChar</param>
+    private void InserirNaListaChar(NoHuffman novoNoHuffman, ListaChar lista){
+        ListaChar novoNo = new ListaChar();
+
+        novoNo.SetSimbolo(novoNoHuffman);
+        novoNo.SetProximoChar(lista.GetProximoChar());
+        lista.SetProximoChar(novoNo);
+    }
+
+    /// <summary>
+    /// Cria o mapa binario para ser usado na hora de gerar a arvore binaria, usando os simbolos como chave
+    /// </summary>
+    /// <param name="listaFrequencia">ListaChar</param>
+    /// <returns>ListaMapaBinario</returns>
+    public ListaMapaBinario CriarMapaBinario(ListaChar listaFrequencia){
         ListaMapaBinario listaBinario = new ListaMapaBinario();
         ListaMapaBinario inicio = listaBinario;
-        char primeiraLetra = mapaFrequenciaChar.GetSimbolo().GetSimbolo();
-        while(mapaFrequenciaChar != null){
-            if(inicio.GetChave() != primeiraLetra){
-                listaBinario.SetChave(mapaFrequenciaChar.GetSimbolo().GetSimbolo());
-                listaBinario.SetValor(null);
-                listaBinario.SetProximoBinario(null);
-                mapaFrequenciaChar = mapaFrequenciaChar.GetProximoChar();
-                inicio = listaBinario;
-            }else{
-                listaBinario = BuscarNaListaBinaria(inicio);
-                if(listaBinario.getProxiBinario() == null){
-                    ListaMapaBinario novoNO = new ListaMapaBinario();
-                    novoNO.SetChave(mapaFrequenciaChar.GetSimbolo().GetSimbolo());
-                    novoNO.SetValor(null);
-                    novoNO.SetProximoBinario(listaBinario.getProxiBinario());
-                    listaBinario.SetProximoBinario(novoNO);
-                    listaBinario = novoNO;
-                    mapaFrequenciaChar = mapaFrequenciaChar.GetProximoChar();
-                }
 
+        char primeiroSimbolo = (char)listaFrequencia.GetSimbolo().GetSimbolo();
+
+        while (listaFrequencia != null){
+            if (inicio.GetChave() != primeiroSimbolo){
+               listaBinario.SetChave((char)listaFrequencia.GetSimbolo().GetSimbolo());
+               listaBinario.SetValor(null);
+               listaBinario.SetProximoBinario(null);
+
+               listaFrequencia = listaFrequencia.GetProximoChar();
+               inicio = listaBinario;
+            }
+            else{
+               listaBinario = this.BuscarFinalListaBinaria(inicio);
+               if (listaBinario.GetProximoBinario() == null){
+                ListaMapaBinario novoNo = new ListaMapaBinario();
+                novoNo.SetChave((char)listaFrequencia.GetSimbolo().GetSimbolo());
+                novoNo.SetValor(null);
+                novoNo.SetProximoBinario(listaBinario.GetProximoBinario());
+                listaBinario.SetProximoBinario(novoNo);
+                listaBinario = novoNo;
+
+                listaFrequencia = listaFrequencia.GetProximoChar();
+               }
             }
         }
+
         return inicio;
     }
 
-    // Cria uma lista com as letra que tem no texto e a frequencia com que ela aparecem
-    private ListaChar GetCharFrequencia(String texto){
-        ListaChar lista = new ListaChar();;
+    /// <summary>
+    /// Percorre a lista de binario até encontrar o ultimo nó e retorna para quem chamou o metodo
+    /// </summary>
+    /// <param name="lista">ListaMapaBinario</param>
+    /// <returns>ListaMapaBinario</returns>
+    private ListaMapaBinario BuscarFinalListaBinaria(ListaMapaBinario lista)
+    {
+        ListaMapaBinario anterior, atual;
+        anterior = lista;
+        atual = lista;
 
-        for(int y = 0; y < texto.length(); y++){
-            char letra = texto.toCharArray()[y];
-            if(lista.GetSimbolo() == null){
-                NoHuffman novoNoHuffman = new NoHuffman(letra, 1);
-                lista.SetSimbolo(novoNoHuffman);
-                inicioLista = lista;
-            }else if(lista != null){
-                lista = this.BuscarNaLista(letra, inicioLista);
-                if(lista.GetSimbolo().GetSimbolo() == letra){
-                    lista.GetSimbolo().SetFrequencia(lista.GetSimbolo().GetFrequencia() + 1);
-                }else if(lista.GetProximoChar() == null){
-                    NoHuffman novoNoHuffman = new NoHuffman(letra, 1);
-                    this.InserirLista(novoNoHuffman, lista);
+        while (atual != null){
+            if (atual.GetProximoBinario() == null)
+            {
+               return atual;
+            }
+
+            anterior = atual;
+            atual = atual.GetProximoBinario();
+        }
+
+        return anterior;
+    }
+
+    public NoHuffman CriarArvore(ListaChar listaFrequenciaChar){
+       ListaChar listaOrdenada = this.OrdenarListaChar(listaFrequenciaChar);
+       ListaChar inicioListaOrdenada = listaOrdenada;
+
+       while (listaOrdenada.GetSimbolo() != null){
+          listaOrdenada.GetSimbolo().SetFolha(true);
+
+          if (listaOrdenada.GetProximoChar() == null){
+            break;
+          }
+
+          listaOrdenada = listaOrdenada.GetProximoChar();
+        }
+
+       listaOrdenada = inicioListaOrdenada;
+
+       while (tamanhoLista > 1){
+          NoHuffman primeiroNo = listaOrdenada.GetSimbolo();
+          NoHuffman segundoNo = listaOrdenada.GetProximoChar().GetSimbolo();
+
+          NoHuffman novoNo = new NoHuffman('~', primeiroNo.GetFrequencia() + segundoNo.GetFrequencia());
+          novoNo.SetNoEsquerdo(primeiroNo);
+          novoNo.SetNoDireito(segundoNo);
+
+          listaOrdenada = this.BuscarFinalListaOrdenada(inicioListaOrdenada);
+          this.InserirNaListaChar(novoNo, listaOrdenada);
+          tamanhoLista += 1;
+
+          inicioListaOrdenada = this.RemoverListaOrdenada(inicioListaOrdenada);
+          inicioListaOrdenada = this.RemoverListaOrdenada(inicioListaOrdenada);
+
+          inicioListaOrdenada = this.OrdenarListaChar(inicioListaOrdenada);
+          listaOrdenada = inicioListaOrdenada;
+        }
+
+       this.raiz = inicioListaOrdenada.GetSimbolo();
+
+       return inicioListaOrdenada.GetSimbolo();
+    }
+
+    /// <summary>
+    /// Ordena a lista do simbolo que mais aparece para o que menos aparece
+    /// </summary>
+    /// <param name="listaFrequenciaChar">Listachar</param>
+    /// <returns>ListaChar</returns>
+    private ListaChar OrdenarListaChar(ListaChar listaFrequenciaChar){
+        ListaChar inicioDaLista = listaFrequenciaChar;
+        ListaChar noAnterior = inicioDaLista;
+        ListaChar noAtual = inicioDaLista;
+        ListaChar proximoNo = inicioDaLista.GetProximoChar();
+
+        for (ListaChar i = inicioDaLista; i.GetProximoChar() != null; i = i.GetProximoChar()){
+
+            if (noAtual.GetSimbolo().GetFrequencia() > proximoNo.GetSimbolo().GetFrequencia()){
+                if (noAtual == inicioDaLista){
+                  noAtual.SetProximoChar(proximoNo.GetProximoChar());
+                  proximoNo.SetProximoChar(noAtual);
+
+                  inicioDaLista = proximoNo;
+
+                  noAnterior = inicioDaLista;
+                  noAtual = inicioDaLista;
+                  proximoNo = inicioDaLista.GetProximoChar();
+
+                  i = inicioDaLista;
+                }
+               else{
+                  ListaChar auxiliar = noAnterior.GetProximoChar();
+                  
+                  noAnterior.SetProximoChar(noAtual.GetProximoChar());
+                  noAtual.SetProximoChar(proximoNo.GetProximoChar());
+                  proximoNo.SetProximoChar(auxiliar);
+                  
+                  noAnterior = inicioDaLista;
+                  noAtual = inicioDaLista;
+                  proximoNo = inicioDaLista.GetProximoChar();
+
+                  i = inicioDaLista;
                 }
             }
-            tamanhoLista++;
-        }
-        lista = inicioLista;
+            else{
+               noAnterior = noAtual;
+               noAtual = proximoNo;
+               proximoNo = proximoNo.GetProximoChar();
+            }
+        }   
 
-        return lista;
+        return inicioDaLista;
     }
 
-    // Percorre a lista de binarios até chegar ao final dela
-    private ListaMapaBinario BuscarNaListaBinaria(ListaMapaBinario lista){
-        ListaMapaBinario atual, finalLista;
-        finalLista = lista;
+    /// <summary>
+    /// Busca o ultimo nó da lista ordenada
+    /// </summary>
+    /// <param name="lista">ListaChar</param>
+    /// <returns>ListaChar</returns>
+    private ListaChar BuscarFinalListaOrdenada(ListaChar lista){
+        ListaChar anterior, atual;
+        anterior = lista;
         atual = lista;
-        while(atual != null && atual.getProxiBinario() != null){
-            finalLista = atual;
-            atual = atual.getProxiBinario();
-        }
-        finalLista = atual;
-        return finalLista;
-    }
 
-    // Busca pela chave passada e retorna o valor binario
-    private String GetValorBinario(char letra, ListaMapaBinario mapaBinario){
-        while(mapaBinario != null && mapaBinario.GetChave() != letra){
-           mapaBinario = mapaBinario.getProxiBinario();
-        }
-        
-        return mapaBinario.GetValor();
-    }
+        while (atual != null){
+            if (atual.GetProximoChar() == null){
+               return atual;
+            }
 
-    // Busca a chave na lista binaria e insere seu valor
-    private void BuscaInseriBinario(char chave,String valor, ListaMapaBinario lista){
-        while(lista.GetChave() != chave){
-            lista = lista.getProxiBinario();
-        }       
-
-        lista.SetValor(valor);
-    }
-
-    // Encontra o final da lista
-    private ListaChar BuscaFinalLista(ListaChar lista){
-        ListaChar atual, finalLista;
-        finalLista = lista;
-        atual = lista;
-        while(atual != null && atual.GetProximoChar() != null){
-            finalLista = atual;
+            anterior = atual;
             atual = atual.GetProximoChar();
         }
-        return finalLista;
+
+        return anterior;
     }
 
-    // Faz uma busca na lista de chars até encontra uma letra igual a que foi passada ou chegar ao final da lista
-    private ListaChar BuscarNaLista(char letra, ListaChar lista){
-        ListaChar atual, finalLista;
-        finalLista = lista;
-        atual = lista.GetProximoChar();
-        atual = lista;
-        while (atual != null && atual.GetSimbolo().GetSimbolo() != letra){
-            finalLista = atual;
-            atual = atual.GetProximoChar();
-        }
-        return finalLista;
-    }
-
-    // Inseri um novo nó na lista de chars
-    private void InserirLista(NoHuffman novoNoHuffman, ListaChar lista){
-        ListaChar novoNO = new ListaChar();
-        novoNO.SetSimbolo(novoNoHuffman);
-        novoNO.SetProximoChar(lista.GetProximoChar());
-        lista.SetProximoChar(novoNO);
-    }
-
-    private ListaChar RemoverLista(ListaChar lista){
+    /// <summary>
+    /// Recebe a primeira posição da lista e então remove ela devolvendo a proxima prosição com a primeira
+    /// </summary>
+    /// <param name="lista">ListaChar</param>
+    /// <returns>ListaChar</returns>
+    private ListaChar RemoverListaOrdenada(ListaChar lista){
         ListaChar lixo = lista;
         lista = lixo.GetProximoChar();
-        tamanhoLista--;
+
+        tamanhoLista -= 1;
+
         return lista;
     }
+   
+
 }

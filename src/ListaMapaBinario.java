@@ -1,11 +1,10 @@
-
 public class ListaMapaBinario {
     private char chave;
     private String valor;
     private ListaMapaBinario proximoBinario;
 
-    public void SetChave(char letra){
-        this.chave = letra;
+    public void SetChave(char chave){
+        this.chave = chave;
     }
 
     public char GetChave(){
@@ -18,13 +17,13 @@ public class ListaMapaBinario {
 
     public String GetValor(){
         return this.valor;
+    } 
+
+    public void SetProximoBinario(ListaMapaBinario proximoBinario){
+        this.proximoBinario = proximoBinario;
     }
 
-    public void SetProximoBinario(ListaMapaBinario proximo){
-        this.proximoBinario = proximo;
-    }
-
-    public ListaMapaBinario getProxiBinario(){
+    public ListaMapaBinario GetProximoBinario(){
         return this.proximoBinario;
     }
 }
