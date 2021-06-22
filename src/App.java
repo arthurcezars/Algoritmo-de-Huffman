@@ -1,12 +1,11 @@
 import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.File;
+import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.ObjectOutputStream;
-import java.util.Scanner;
+import java.io.OutputStream;
+import java.util.BitSet;
 
 public class App {
     public static void main(String[] args) throws Exception {
@@ -43,11 +42,30 @@ public class App {
        System.out.println(textoCompactado);
 
        try {
-           FileWriter fw = new FileWriter("D:\\Repositorio Local\\Faculdade\\UCL - Sistemas de Informação\\Algoritmos e Estruturas " + 
-                "de Dados II\\Algoritmo de Huffman\\src\\arquivos\\testeCompactado.txt");
+           
+           //FileWriter fw = new FileWriter("D:\\Repositorio Local\\Faculdade\\UCL - Sistemas de Informação\\Algoritmos e Estruturas " + 
+                //"de Dados II\\Algoritmo de Huffman\\src\\arquivos\\testeCompactado.txt");
             
-            fw.write(textoCompactado);
-            fw.close();
+            //fw.write(textoCompactado);
+            //fw.close();
+
+            BitSet bs = new BitSet();
+            int i = 0;
+            for (char teste : textoCompactado.toCharArray()) {
+                if(teste == '0'){
+                    bs.set(i, false);
+                    i += 1;
+                }else if(teste == '1'){
+                    bs.set(i, true);
+                    i += 1;
+                }
+            }
+            
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("D:\\Repositorio Local\\Faculdade\\UCL - Sistemas de Informação\\Algoritmos e Estruturas " + 
+                "de Dados II\\Algoritmo de Huffman\\src\\arquivos\\testeCompactado2.txt"));
+            oos.writeObject(bs);
+            oos.close();
+
         }catch (Exception e) {
             System.out.println("Exception: " + e.getMessage());           
         }finally{
