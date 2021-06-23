@@ -51,11 +51,11 @@ public class App {
 
             BitSet bs = new BitSet();
             int i = 0;
-            for (char teste : textoCompactado.toCharArray()) {
-                if(teste == '0'){
+            for (char simbolo : textoCompactado.toCharArray()) {
+                if(simbolo == '0'){
                     bs.set(i, false);
                     i += 1;
-                }else if(teste == '1'){
+                }else if(simbolo == '1'){
                     bs.set(i, true);
                     i += 1;
                 }
